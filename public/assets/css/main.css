@@ -4,7 +4,8 @@ body {
   body > .main-wrap {
     position: relative;
     padding: 15px 15px 10px 15px;
-    border: 1px solid lightgrey; }
+    border: 1px solid lightgrey;
+    height: calc(100vh - 100px); }
     body > .main-wrap > .elem {
       width: 100%;
       height: 100%;

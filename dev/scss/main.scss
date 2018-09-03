@@ -5,9 +5,8 @@ body {
   > .main-wrap {
     position: relative;
     padding: 15px 15px 10px 15px;
-    // width: 100%;
-    // min-height: 300px;
     border: 1px solid lightgrey;
+    height: calc(100vh - 100px);
 
     > .elem {
       width: 100%;
