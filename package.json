@@ -4,9 +4,17 @@
   "description": "starting git-project nr1",
   "main": "index.js",
   "dependencies": {
-    "gulp": "^3.9.1"
+    "gem": "^2.4.3",
+    "gulp-jshint": "^2.1.0",
+    "gulp-sass": "^4.0.1",
+    "kontra": "^4.0.1",
+    "node-sass": "^4.9.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-watch": "^5.0.1",
+    "jshint": "^2.9.6"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
