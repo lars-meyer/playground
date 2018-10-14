@@ -8,23 +8,19 @@ var moveArr = [],
     goalsprite,
     usersprite,
     loop,
-    // boxWrapper = document.querySelector('.elem'),
-    // boxWrapperHeight = boxWrapper.clientHeight;
     kontra,
     spriteY = -30,
     lastColor = 0,
-    loopRunning = false;
+    loopRunning = false,
+    userMove = false,
+    currentKey,
+    lastKey;
 
 setTimeout( function() {
-  console.log('now');
-
   var staticStuff = createStaticElems();
-
   if (staticStuff) {
     createMovingElems();
   }
-
-
 }, 1000);
 
 /**
@@ -43,23 +39,15 @@ function createStaticElems () {
   });
 
   usersprite = kontra.sprite({
-    x: 70,
-    y: 120,
+    x: 115,
+    y: 115,
     color: 'purple',
-    width: 10,
-    height: 5
+    width: 13,
+    height: 7
   });
 
   spriteArr.push(goalsprite);
   spriteArr.push(usersprite);
-
-  document.addEventListener('keydown', function (event) {
-    console.log('keydown', event);
-    console.log(event.keyCode);
-
-  });
-
-
 
   return true;
 }
@@ -106,18 +94,16 @@ function addElemsToCanvas() {
 
         item.update();
 
-        if (item.y > kontra.canvas.height) {
-          item.y = spriteY;
-          item.x = randomizeVal('offsetX');
-          item.color = randomizeVal('color');
-          item.dy = randomizeVal('dropRate');
+        // collision with canvas end or goalline
+        if (item.y > kontra.canvas.height || item.collidesWith(goalsprite) ) {
+          randomizeItem(item);
         }
 
-        if (item.collidesWith(goalsprite)) {
-          item.y = spriteY;
-          item.x = randomizeVal('offsetX');
-          item.color = randomizeVal('color');
-          item.dy = randomizeVal('dropRate');
+        // collision with user square
+        if (item.collidesWith(usersprite)) {
+          // console.log('collision user');
+          randomizeItem(item);
+          // stopLoop();
         }
 
       });
@@ -138,18 +124,142 @@ function addElemsToCanvas() {
   btnEvents();
 }
 
+// (re)start loop again
 function startLoop() {
   loop.start();
   loopRunning = true;
 }
 
-
+// pause(!) loop
 function stopLoop() {
-
   loop.stop();
   loopRunning = false;
 }
 
+// add controls to usersprite
+document.addEventListener('keydown', function (event) {
+  // console.log(event.keyCode);
+  // console.log(event.target);
+
+  event.preventDefault();
+
+  if (!userMove) {
+    moveUsersprite(event.keyCode);
+    userMove = true;
+  }
+
+});
+
+function moveUsersprite(mod) {
+
+  // moveUsersprite
+  var coordStep = 5,
+      movingSpeed = 15,
+      topBound = usersprite.height,
+      leftBound = 5,
+      rightBound = kontra.canvas.width - usersprite.width - 5,
+      bottomBound = goalsprite.position.y + usersprite.height - 15;
+
+  var anim;
+
+  document.addEventListener('keyup', function () {
+    clearInterval(anim);
+    userMove = false;
+  });
+
+  console.log('***', mod , '***');
+
+  if (mod !== lastKey || lastKey === undefined) {
+    lastKey = mod;
+  }
+
+  switch (mod) {
+    // arrow left
+    case 37:
+      anim = setInterval( function ()  {
+        moveSquare('x', true, leftBound);
+      }, movingSpeed);
+
+      break;
+
+    // // arrow top
+    // case 38:
+    //
+    //   anim = setInterval( function (){
+    //     moveSquare('y', true, topBound);
+    //   },  movingSpeed);
+    //
+    //   break;
+
+    // arrow right
+    case 39:
+      anim = setInterval( function () {
+        moveSquare('x', false, rightBound);
+      },movingSpeed);
+
+      break;
+
+    // // arrow down
+    // case 40:
+    //   anim = setInterval( function () {
+    //     moveSquare('y', false, bottomBound);
+    //   },  movingSpeed);
+    //   break;
+
+    default:
+      break;
+  }
+
+  function moveSquare( axe, toZero, bound ) {
+
+    if (axe === 'x') {
+
+      if ( toZero ) {
+        usersprite.position.x = usersprite.position.x - coordStep;
+
+        // limit
+        if ( usersprite.position.x <= bound ) {
+          usersprite.position.x = bound;
+        }
+      }
+
+      else {
+        usersprite.position.x = usersprite.position.x + coordStep;
+
+        // limit top
+        if ( usersprite.position.x >= bound ) {
+          usersprite.position.x = bound;
+        }
+      }
+    }
+
+    else {
+      if ( toZero ) {
+        usersprite.position.y = usersprite.position.y - coordStep;
+
+        // limit
+        if ( usersprite.position.y <= bound ) {
+          usersprite.position.y = bound;
+        }
+      }
+
+      else {
+        usersprite.position.y = usersprite.position.y + coordStep;
+
+        // limit top
+        if ( usersprite.position.y >= bound ) {
+          usersprite.position.y = bound;
+        }
+      }
+
+    }
+
+  }
+
+  return(true);
+};
+
+// add events to buttons like toggle
 function btnEvents() {
 
   var actionBtns = document.querySelectorAll('button.button-action');
@@ -170,32 +280,37 @@ function btnEvents() {
 function toggleActions(actionBtns, elem) {
 
   actionBtns.forEach(function(actionBtn) {
-
     // toggle js-active-class for each elem if there is one
     if ( actionBtn.dataset.jsAction === elem.dataset.jsAction ) {
       actionBtn.classList.toggle('js-active');
-      elem.classList.toggle('js-active');
     }
-
-    // pause logic
-    var startBtn = document.querySelector('.button-start');
-    var pauseBtn = document.querySelector('.button-pause');
-
-    pauseBtn.addEventListener('click', function() {
-      if (loopRunning) {
-        stopLoop();
-      }
-    });
-
-    startBtn.addEventListener('click', function() {
-      if (!loopRunning) {
-        startLoop();
-      }
-    });
-
   });
 
-  console.log(elem);
+  // pause logic
+  var startBtn = document.querySelector('button.button-action.button-start');
+  var pauseBtn = document.querySelector('button.button-action.button-pause');
+
+  pauseBtn.addEventListener('click', function() {
+    if (loopRunning) {
+      stopLoop();
+    }
+  });
+
+  startBtn.addEventListener('click', function() {
+    if (!loopRunning) {
+      startLoop();
+    }
+  });
+
+  // console.log(elem);
+}
+
+// call randomize func
+function randomizeItem(item) {
+  item.y = spriteY;
+  item.x = randomizeVal('offsetX');
+  item.color = randomizeVal('color');
+  item.dy = randomizeVal('dropRate');
 }
 
 // randomize new values for each mov elem
