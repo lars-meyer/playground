@@ -1,39 +1,67 @@
 
+
 this.kontra.init();
 
 // vars
 var moveArr = [],
     spriteArr = [],
     goalsprite,
+    usersprite,
     loop,
     // boxWrapper = document.querySelector('.elem'),
     // boxWrapperHeight = boxWrapper.clientHeight;
     kontra,
     spriteY = -30,
-    colorCount = 0;
+    lastColor = 0,
+    loopRunning = false;
 
-var staticStuff = createStaticElems();
+setTimeout( function() {
+  console.log('now');
+
+  var staticStuff = createStaticElems();
+
+  if (staticStuff) {
+    createMovingElems();
+  }
+
+
+}, 1000);
 
 /**
 * create all static elems
 *
 */
 function createStaticElems () {
+
   // create goal line
   goalsprite = kontra.sprite({
     x: 0,
-    y: 130,
+    y: 125,
     color: '#000',
     width: 500,
     height: 1
   });
+
+  usersprite = kontra.sprite({
+    x: 70,
+    y: 120,
+    color: 'purple',
+    width: 10,
+    height: 5
+  });
+
   spriteArr.push(goalsprite);
+  spriteArr.push(usersprite);
+
+  document.addEventListener('keydown', function (event) {
+    console.log('keydown', event);
+    console.log(event.keyCode);
+
+  });
+
+
 
   return true;
-}
-
-if (staticStuff) {
-  createMovingElems();
 }
 
 /**
@@ -42,19 +70,15 @@ if (staticStuff) {
 */
 function createMovingElems () {
 
+  // counts objects
   var movCreateCount = 1,
-      movElemCount = 5;
+  // object count limit
+      movElemLimit = 5;
 
-  for (movCreateCount; movCreateCount <= movElemCount; movCreateCount++) {
+  for (movCreateCount; movCreateCount <= movElemLimit; movCreateCount++) {
 
     var spriteWidth = 10,
-        spriteHeight = 10,
-        spriteX = 5,
-        dropRate = 1;
-
-    if (movCreateCount > 1) {
-      spriteX = spriteX + 10;
-    }
+        spriteHeight = 5;
 
     var sprite = kontra.sprite({
       x: randomizeVal('offsetX'),
@@ -67,7 +91,7 @@ function createMovingElems () {
 
     moveArr.push(sprite);
 
-    if (movCreateCount === movElemCount) {
+    if (movCreateCount === movElemLimit) {
       addElemsToCanvas();
     }
   }
@@ -98,6 +122,7 @@ function addElemsToCanvas() {
 
       });
     },
+
     render: function() {
       spriteArr.forEach(function(item) {
         item.render();
@@ -110,10 +135,67 @@ function addElemsToCanvas() {
   });
 
   startLoop();
+  btnEvents();
 }
 
 function startLoop() {
   loop.start();
+  loopRunning = true;
+}
+
+
+function stopLoop() {
+
+  loop.stop();
+  loopRunning = false;
+}
+
+function btnEvents() {
+
+  var actionBtns = document.querySelectorAll('button.button-action');
+
+  // show pause on init
+  document.querySelector('.button-pause').classList.add('js-active');
+
+  if (actionBtns.length) {
+    actionBtns.forEach(function(actionBtn) {
+      toggleActions(actionBtns, actionBtn);
+      actionBtn.addEventListener('click', function() {
+        toggleActions(actionBtns, actionBtn);
+      });
+    });
+  }
+}
+
+function toggleActions(actionBtns, elem) {
+
+  actionBtns.forEach(function(actionBtn) {
+
+    // toggle js-active-class for each elem if there is one
+    if ( actionBtn.dataset.jsAction === elem.dataset.jsAction ) {
+      actionBtn.classList.toggle('js-active');
+      elem.classList.toggle('js-active');
+    }
+
+    // pause logic
+    var startBtn = document.querySelector('.button-start');
+    var pauseBtn = document.querySelector('.button-pause');
+
+    pauseBtn.addEventListener('click', function() {
+      if (loopRunning) {
+        stopLoop();
+      }
+    });
+
+    startBtn.addEventListener('click', function() {
+      if (!loopRunning) {
+        startLoop();
+      }
+    });
+
+  });
+
+  console.log(elem);
 }
 
 // randomize new values for each mov elem
@@ -136,41 +218,48 @@ function randomizeVal(mod) {
   if (mod === 'dropRate') {
     // dropRate
     var minDrop = 1,
-        maxDrop = 4,
+        maxDrop = 3,
         dropRate = Math.random() * (maxDrop - minDrop) + minDrop,
-        dropRate = dropRate.toFixed(2);
+        dropRateRnd = dropRate.toFixed(2);
 
-    return(dropRate);
+    return(dropRateRnd);
   }
 
   if (mod === 'color') {
 
     var color;
 
-    if (colorCount === 0) {
-      color = 'red';
-      colorCount++;
+    // dropRate
+    var mincolor = 1,
+        colorCount = 5,
+        colorSelector = Math.random() * (colorCount - mincolor) + mincolor,
+        colorSelectorRnd = parseInt(colorSelector);
+
+    if ( colorSelectorRnd === lastColor ) {
+      colorSelectorRnd++;
+    }
+    // console.log(colorSelectorRnd, lastColor);
+
+    lastColor = colorSelectorRnd;
+
+    switch(colorSelectorRnd) {
+      case 0:
+        color = 'red';
+        break;
+      case 1:
+        color = 'yellow';
+        break;
+      case 2:
+        color = 'orange';
+        break;
+      case 3:
+        color = 'blue';
+        break;
+      default:
+        color = 'green';
     }
 
-    else if (colorCount === 1) {
-      color = 'yellow';
-      colorCount++;
-    }
-
-    else if (colorCount === 2) {
-      color = 'orange';
-      colorCount++;
-    }
-
-    else if (colorCount === 3) {
-      color = 'blue';
-      colorCount++;
-    }
-
-    else {
-      color = 'green';
-      colorCount = 0;
-    }
+    // console.log(color);
 
     return(color);
   }

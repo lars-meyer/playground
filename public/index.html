@@ -9,17 +9,29 @@
     <!-- <h1>Game</h1> -->
 
     <div class="main-wrap">
-      <canvas class="elem"></canvas>
+      <canvas class="mainCanvas"></canvas>
     </div>
 
+    <button class="button-action button-start" data-jsAction='action1'>
+      Start
+    </button>
+    <button class="button-action button-pause" data-jsAction='action1'>
+      Pause
+    </button>
 
-    <script src="assets/src/js/kontra.js"></script >
-    <script src="assets/js/main.js"></script >
+
+
+
+    <!-- JS -->
+
+    <script src="assets/src/js/kontra.js"></script>
+    <script src="assets/js/main.js"></script>
 
     <script>
       document.write(
         '<script src="http://' + (location.host || 'localhost').split(':')[0] +
         ':35729/livereload.js?snipver=1"></' + 'script>')
     </script>
+
   </body>
 </html>
