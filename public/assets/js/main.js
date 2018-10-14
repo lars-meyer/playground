@@ -167,7 +167,7 @@ function moveUsersprite(mod) {
     userMove = false;
   });
 
-  console.log('***', mod , '***');
+  // console.log('***', mod , '***');
 
   if (mod !== lastKey || lastKey === undefined) {
     lastKey = mod;
